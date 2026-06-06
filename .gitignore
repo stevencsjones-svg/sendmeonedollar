@@ -1,6 +1,12 @@
 # Dependencies (not used, but just in case)
 node_modules/
 
+# Local build tooling for SEO image generation only.
+# The deployed site is pure static HTML/CSS/JS — these never ship.
+package.json
+package-lock.json
+gen-images.js
+
 # OS cruft
 .DS_Store
 Thumbs.db
