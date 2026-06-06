@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Send Me One Dollar — Please.</title>
+<meta name="description" content="A website with one humble request: send me one dollar. No pitch. No product. Just a dollar. Please." />
+
+<!-- Open Graph / social -->
+<meta property="og:title" content="Send Me One Dollar." />
+<meta property="og:description" content="No pitch. No product. Just a dollar. Please." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://sendmeonedollar.org" />
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💵</text></svg>" />
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Permanent+Marker&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --green: #00c853;
+    --yellow: #ffe600;
+    --black: #0a0a0a;
+    --ink: #f5f5f5;
+    --card: #141414;
+    --border: #262626;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--ink);
+    font-family: "DM Sans", system-ui, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--yellow); color: #000; }
+
+  a { color: inherit; }
+
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- TICKER ---------- */
+  .ticker {
+    background: var(--green);
+    color: #00210d;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 1.5px;
+    padding: 10px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 3px solid #000;
+  }
+  .ticker__track {
+    display: inline-block;
+    padding-left: 100%;
+    animation: ticker 18s linear infinite;
+  }
+  .ticker:hover .ticker__track { animation-play-state: paused; }
+  .ticker__track span { margin: 0 28px; }
+  @keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    text-align: center;
+    padding: 70px 0 80px;
+    position: relative;
+  }
+  .hero__emoji {
+    font-size: clamp(4rem, 14vw, 9rem);
+    line-height: 1;
+    display: inline-block;
+    animation: float 3.4s ease-in-out infinite;
+    filter: drop-shadow(0 12px 24px rgba(0, 200, 83, 0.35));
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50%      { transform: translateY(-22px) rotate(3deg); }
+  }
+  .hero h1 {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(3.5rem, 16vw, 11rem);
+    line-height: 0.86;
+    letter-spacing: 2px;
+    margin: 18px 0 10px;
+    text-transform: uppercase;
+  }
+  .hero h1 .green { color: var(--green); }
+  .hero .tagline {
+    font-family: "Permanent Marker", cursive;
+    color: var(--yellow);
+    font-size: clamp(1.1rem, 4vw, 1.9rem);
+    transform: rotate(-1.5deg);
+    margin-top: 6px;
+  }
+
+  /* ---------- CTA BUTTON ---------- */
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--green);
+    color: #00210d;
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    letter-spacing: 1.5px;
+    text-decoration: none;
+    padding: 18px 44px;
+    border-radius: 999px;
+    border: 4px solid #000;
+    box-shadow: 0 0 0 4px var(--green), 0 16px 40px rgba(0, 200, 83, 0.4);
+    cursor: pointer;
+    transition: transform 0.12s ease;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  .cta-btn:hover { transform: scale(1.05) rotate(-1deg); }
+  .cta-btn:active { transform: scale(0.97); }
+  .cta-btn .sub {
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px var(--green), 0 16px 40px rgba(0, 200, 83, 0.4); }
+    50%      { box-shadow: 0 0 0 10px rgba(0, 200, 83, 0.25), 0 16px 50px rgba(0, 200, 83, 0.6); }
+  }
+  .cta-note {
+    margin-top: 16px;
+    font-size: 0.9rem;
+    color: #9a9a9a;
+  }
+
+  /* ---------- SECTION SHELL ---------- */
+  section { padding: 70px 0; }
+  .section-title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(2.4rem, 8vw, 4.5rem);
+    letter-spacing: 1.5px;
+    text-align: center;
+    line-height: 1;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .section-title .hl {
+    background: var(--yellow);
+    color: #000;
+    padding: 0 10px;
+    transform: rotate(-1deg);
+    display: inline-block;
+  }
+  .section-sub {
+    text-align: center;
+    color: #9a9a9a;
+    max-width: 560px;
+    margin: 0 auto 46px;
+  }
+
+  /* ---------- REASONS GRID ---------- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 26px 24px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+    border-color: var(--green);
+  }
+  .card .num {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 2.2rem;
+    color: var(--green);
+    line-height: 1;
+  }
+  .card h3 {
+    font-family: "Permanent Marker", cursive;
+    color: var(--yellow);
+    font-size: 1.25rem;
+    margin: 8px 0 10px;
+    font-weight: normal;
+  }
+  .card p { color: #cfcfcf; font-size: 0.98rem; }
+
+  /* ---------- COUNTER ---------- */
+  .counter-box { text-align: center; }
+  .counter {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(4rem, 18vw, 12rem);
+    line-height: 0.9;
+    color: var(--green);
+    letter-spacing: 2px;
+    text-shadow: 0 0 40px rgba(0, 200, 83, 0.4);
+  }
+  .counter-label {
+    font-family: "Permanent Marker", cursive;
+    color: var(--yellow);
+    font-size: clamp(1rem, 4vw, 1.6rem);
+    margin-top: 4px;
+  }
+  .counter-disclaimer {
+    color: #777;
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 18px;
+    max-width: 460px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ---------- FAQ ---------- */
+  .faq { max-width: 760px; margin: 0 auto; }
+  details {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 4px 22px;
+    margin-bottom: 12px;
+    transition: border-color 0.15s ease;
+  }
+  details[open] { border-color: var(--green); }
+  summary {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    padding: 16px 0;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: "+";
+    color: var(--green);
+    font-size: 1.8rem;
+    transition: transform 0.2s ease;
+  }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { padding: 0 0 18px; color: #cfcfcf; }
+
+  /* ---------- SECOND CTA ---------- */
+  .cta2 {
+    text-align: center;
+    background: linear-gradient(180deg, #0a0a0a, #0d1a0f);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .cta2 h2 {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(2.2rem, 7vw, 4rem);
+    line-height: 1;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .cta2 p {
+    font-family: "Permanent Marker", cursive;
+    color: var(--yellow);
+    margin-bottom: 30px;
+    font-size: clamp(1rem, 4vw, 1.5rem);
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    text-align: center;
+    padding: 50px 24px 70px;
+    color: #777;
+    font-size: 0.9rem;
+  }
+  footer a { color: var(--green); text-decoration: none; font-weight: 700; }
+  footer a:hover { text-decoration: underline; }
+  footer .heart { color: var(--green); }
+
+  /* ---------- CONFETTI ---------- */
+  #confetti-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .hero__emoji, .cta-btn, .ticker__track { animation: none; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- TICKER -->
+  <div class="ticker" aria-hidden="true">
+    <div class="ticker__track">
+      <span>💵 JUST ONE DOLLAR</span><span>·</span>
+      <span>🙏 THAT'S ALL I'M ASKING</span><span>·</span>
+      <span>💸 ONE SINGLE DOLLAR</span><span>·</span>
+      <span>✅ NO STRINGS ATTACHED</span><span>·</span>
+      <span>💵 JUST ONE DOLLAR</span><span>·</span>
+      <span>🙏 THAT'S ALL I'M ASKING</span><span>·</span>
+      <span>💸 ONE SINGLE DOLLAR</span><span>·</span>
+      <span>✅ NO STRINGS ATTACHED</span><span>·</span>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="wrap">
+      <div class="hero__emoji">💵</div>
+      <h1>Send Me<br /><span class="green">One Dollar.</span></h1>
+      <p class="tagline">No pitch. No product. Just a dollar. Please.</p>
+      <div style="margin-top: 38px;">
+        <a class="cta-btn" id="payBtn" href="https://paypal.me/stevejZA/1" target="_blank" rel="noopener noreferrer">
+          💸 Send $1.00 Now
+          <span class="sub">via PayPal</span>
+        </a>
+        <p class="cta-note">Pre-filled to exactly $1.00. You can't be overcharged. I checked.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- REASONS -->
+  <section id="why">
+    <div class="wrap">
+      <h2 class="section-title">Why Should You <span class="hl">Send Me $1?</span></h2>
+      <p class="section-sub">Compelling, airtight, legally-not-binding reasons. Pick your favourite.</p>
+      <div class="grid">
+        <div class="card">
+          <div class="num">01</div>
+          <h3>It's just a dollar</h3>
+          <p>You've lost more than this in your couch cushions and felt nothing. Be honest.</p>
+        </div>
+        <div class="card">
+          <div class="num">02</div>
+          <h3>No subscription</h3>
+          <p>One dollar. One time. I will never email you. I will never "circle back."</p>
+        </div>
+        <div class="card">
+          <div class="num">03</div>
+          <h3>The economy</h3>
+          <p>By sending me $1 you are technically stimulating it. You're basically an economist now.</p>
+        </div>
+        <div class="card">
+          <div class="num">04</div>
+          <h3>Good karma</h3>
+          <p>The universe keeps receipts. This is the cheapest blessing you'll buy all year.</p>
+        </div>
+        <div class="card">
+          <div class="num">05</div>
+          <h3>Bragging rights</h3>
+          <p>You can tell people you funded a website's entire business model. Single-handedly.</p>
+        </div>
+        <div class="card">
+          <div class="num">06</div>
+          <h3>I asked nicely</h3>
+          <p>Genuinely. Look how nicely. There's a whole pulsing button and everything.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COUNTER -->
+  <section id="counter" class="counter-box">
+    <div class="wrap">
+      <h2 class="section-title">Dollars <span class="hl">Allegedly Raised</span></h2>
+      <div class="counter" id="counter">$0</div>
+      <p class="counter-label">…and counting (citation needed)</p>
+      <p class="counter-disclaimer">This number is not connected to anything. But imagine if it was.</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="wrap">
+      <h2 class="section-title">Frequently <span class="hl">Asked Questions</span></h2>
+      <p class="section-sub">Real questions. Surprisingly honest answers.</p>
+      <div class="faq">
+        <details>
+          <summary>Is this a scam?</summary>
+          <p>No. A scam implies you get something and it's secretly bad. Here you get nothing, openly. It's the most transparent transaction on the internet.</p>
+        </details>
+        <details>
+          <summary>What do I get for my dollar?</summary>
+          <p>The warm, fleeting glow of having done a small, silly thing. Also my sincere and eternal gratitude, which is worth at least a dollar.</p>
+        </details>
+        <details>
+          <summary>Why a dollar? Why not more?</summary>
+          <p>Because a dollar is small enough that you'll say "eh, sure" and large enough to matter when enough people say it. It's behavioural economics. It's science. Sort of.</p>
+        </details>
+        <details>
+          <summary>Can I send more than a dollar?</summary>
+          <p>I won't stop you. The button says $1 because I'm not greedy, just persistent. But the PayPal page is yours to edit. Live your truth.</p>
+        </details>
+        <details>
+          <summary>What will you spend it on?</summary>
+          <p>Honestly? Probably also a dollar's worth of something. The cycle of commerce continues. You're part of something bigger now.</p>
+        </details>
+        <details>
+          <summary>I feel weird about this.</summary>
+          <p>That's not a question, but I respect it. The weirdness fades the instant you click the button. Try it. Science.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECOND CTA -->
+  <section class="cta2">
+    <div class="wrap">
+      <h2>You've scrolled this far.</h2>
+      <p>You basically already owe me the dollar.</p>
+      <a class="cta-btn" href="https://paypal.me/stevejZA/1" target="_blank" rel="noopener noreferrer" onclick="window.fireConfetti && window.fireConfetti()">
+        💵 Fine, Here's My Dollar
+        <span class="sub">$1.00 · PayPal</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Made with hope and very low overhead.</p>
+    <p style="margin-top:8px;">
+      <a href="https://paypal.me/stevejZA/1" target="_blank" rel="noopener noreferrer">paypal.me/stevejZA/1</a>
+    </p>
+    <p style="margin-top:18px;">© <span id="year"></span> SendMeOneDollar.org · A monument to asking nicely <span class="heart">💵</span></p>
+  </footer>
+
+  <canvas id="confetti-canvas"></canvas>
+
+  <script>
+    // Footer year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    /* ---------- CONFETTI ---------- */
+    (function () {
+      const canvas = document.getElementById("confetti-canvas");
+      const ctx = canvas.getContext("2d");
+      let particles = [];
+      let running = false;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener("resize", resize);
+
+      const colors = ["#00c853", "#ffe600", "#ffffff", "#1de372"];
+
+      function burst() {
+        const count = 140;
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: canvas.width / 2,
+            y: canvas.height / 3,
+            vx: (Math.random() - 0.5) * 14,
+            vy: Math.random() * -15 - 4,
+            size: Math.random() * 9 + 4,
+            color: colors[(Math.random() * colors.length) | 0],
+            rot: Math.random() * Math.PI,
+            vr: (Math.random() - 0.5) * 0.3,
+            life: 1,
+          });
+        }
+        if (!running) { running = true; requestAnimationFrame(loop); }
+      }
+
+      function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p) => {
+          p.vy += 0.35; // gravity
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+          p.life -= 0.008;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          ctx.globalAlpha = Math.max(p.life, 0);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+          ctx.restore();
+        });
+        particles = particles.filter((p) => p.life > 0 && p.y < canvas.height + 50);
+        if (particles.length > 0) {
+          requestAnimationFrame(loop);
+        } else {
+          running = false;
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+
+      window.fireConfetti = burst;
+
+      // Fire on main CTA click (let the link still open)
+      document.getElementById("payBtn").addEventListener("click", burst);
+    })();
+
+    /* ---------- ANIMATED COUNTER ---------- */
+    (function () {
+      const el = document.getElementById("counter");
+      // A "number". Not connected to anything. But imagine if it was.
+      const target = 13000 + Math.floor(Math.random() * 24000);
+      let started = false;
+
+      function animate() {
+        const duration = 2200;
+        const startTime = performance.now();
+        function step(now) {
+          const t = Math.min((now - startTime) / duration, 1);
+          // easeOutExpo
+          const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+          const val = Math.floor(eased * target);
+          el.textContent = "$" + val.toLocaleString();
+          if (t < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+      }
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting && !started) {
+              started = true;
+              animate();
+            }
+          });
+        },
+        { threshold: 0.4 }
+      );
+      obs.observe(el);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Dependencies (not used, but just in case)
+node_modules/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+.env.*
+
+# Editor
+.vscode/
+.idea/
+*.swp
