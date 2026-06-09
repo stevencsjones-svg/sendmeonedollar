@@ -107,39 +107,6 @@
     max-width: 26em;
   }
 
-  .pay {
-    display: inline-block;
-    background: #00c853;
-    color: #000;
-    font-size: clamp(1.15rem, 5vw, 1.4rem);
-    font-weight: 700;
-    text-decoration: none;
-    padding: 14px 36px;
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 200, 83, 0.35);
-    transition: transform 0.12s ease, box-shadow 0.12s ease;
-  }
-  .pay:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0, 200, 83, 0.45); }
-  .pay:active { transform: translateY(0); }
-  .pay:focus-visible { outline: 3px solid #111; outline-offset: 3px; }
-
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    max-width: 300px;
-    margin: 0 auto;
-    font-size: 0.75rem;
-    color: #999;
-  }
-  .divider::before, .divider::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: #ddd;
-  }
-
   #paypal-button-container {
     max-width: 300px;
     margin: 0.5rem auto 0;
