@@ -61,32 +61,94 @@
 }
 </script>
 
+<!-- FAQ structured data (rich-result eligible) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is SendMeOneDollar.org?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It's a website that asks you to send one dollar. That is the entire concept. No product ships, no newsletter arrives, no upsell appears later. You send one dollar to a stranger on the internet, and the stranger is genuinely grateful."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why should I send one dollar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Because it's one dollar. You won't feel it leave your account, and yet, one dollar at a time, it adds up to something genuinely encouraging. Think of it as the cheapest way to make a stranger's day."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is it safe to send money here?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Every payment is handled entirely by PayPal's secure checkout. This site never sees or stores your card or bank details. You're simply clicking a button that hands you over to PayPal."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I pay by card without a PayPal account?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Use the Debit or Credit Card button and you can send your dollar with a card directly, no PayPal account required."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Where does my dollar actually go?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To the person who built this website. It will most likely be spent on something worth approximately one dollar, continuing the ancient cycle of commerce."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I send more than a dollar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can. The site is named after one dollar out of modesty, not law. PayPal will happily let you change the amount. One dollar is, and always will be, plenty."
+      }
+    }
+  ]
+}
+</script>
+
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
-  html, body { height: 100%; }
+  html { scroll-behavior: smooth; }
 
   body {
-    min-height: 100vh;
-    min-height: 100dvh;
-    display: flex;
     background: #fafafa;
     color: #111;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     line-height: 1.5;
-    padding: 16px;
     overflow-x: hidden;
-    overflow-y: auto;
+  }
+
+  .hero {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
+    padding: 16px;
   }
 
   main {
-    margin: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 14px;
     max-width: 540px;
+    width: 100%;
   }
 
   .emoji {
@@ -113,23 +175,92 @@
     width: 100%;
   }
 
+  .scroll-hint {
+    margin-top: 12px;
+    font-size: 0.85rem;
+    color: #999;
+    text-decoration: none;
+  }
+  .scroll-hint:hover { color: #00a846; }
+
+  .content {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 10px 20px 30px;
+    text-align: left;
+  }
+  .content h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    text-align: center;
+    margin-bottom: 26px;
+  }
+  .qa { margin-bottom: 22px; }
+  .qa h3 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.15rem;
+    margin-bottom: 4px;
+  }
+  .qa p { color: #333; font-size: 0.98rem; }
+  .qa a { color: #00a846; font-weight: 600; }
+
   footer {
+    text-align: center;
     font-size: 0.9rem;
     color: #888;
-    margin-top: 4px;
+    padding: 0 20px 50px;
   }
+  footer a { color: #888; }
 </style>
 
 <script src="https://www.paypal.com/sdk/js?client-id=AXWeUeNiGnGt6i3UkSImVHYO14dZbk3XVyM79uq9GH92ZseT2XLonzVj_6VhpnepJfCLUgOHCCrm-fJi&currency=USD"></script>
 </head>
 <body>
-  <main>
-    <div class="emoji">💵</div>
-    <h1>Send Me One Dollar.</h1>
-    <p class="blurb">I built a website. The website asks for a dollar. You're on the website.</p>
-    <div id="paypal-button-container" onclick="gtag('event', 'click_pay_button', {'event_category': 'engagement', 'event_label': 'paypal_checkout', 'value': 1})"></div>
-    <footer>That's it. That's the whole site.<br /><a href="/privacy.html" style="color: #888;">Privacy Policy</a></footer>
-  </main>
+  <section class="hero">
+    <main>
+      <div class="emoji">💵</div>
+      <h1>Send Me One Dollar.</h1>
+      <p class="blurb">I built a website. The website asks for a dollar. You're on the website.</p>
+      <div id="paypal-button-container" onclick="gtag('event', 'click_pay_button', {'event_category': 'engagement', 'event_label': 'paypal_checkout', 'value': 1})"></div>
+      <a class="scroll-hint" href="#faq">↓ wait, who are you?</a>
+    </main>
+  </section>
+
+  <section class="content" id="faq">
+    <h2>Questions you might reasonably have</h2>
+
+    <div class="qa">
+      <h3>What is SendMeOneDollar.org?</h3>
+      <p>It's a website that asks you to send one dollar. That is the entire concept. No product ships, no newsletter arrives, no upsell appears later. You send one dollar to a stranger on the internet, and the stranger is genuinely grateful. It is the simplest possible transaction.</p>
+    </div>
+
+    <div class="qa">
+      <h3>Why should I send one dollar?</h3>
+      <p>Because it's one dollar. You won't feel it leave your account, and yet — one dollar at a time — it adds up to something genuinely encouraging. Think of it as the cheapest way to quietly make a stranger's day.</p>
+    </div>
+
+    <div class="qa">
+      <h3>Is it safe to send money here?</h3>
+      <p>Yes. Every payment is handled entirely by PayPal's secure checkout — this site never sees or stores your card or bank details. You're simply clicking a button that hands you over to PayPal. More detail lives in the <a href="/privacy.html">privacy policy</a>.</p>
+    </div>
+
+    <div class="qa">
+      <h3>Can I pay by card without a PayPal account?</h3>
+      <p>Yes. Use the "Debit or Credit Card" button and you can send your dollar with a card directly — no PayPal account required.</p>
+    </div>
+
+    <div class="qa">
+      <h3>Where does my dollar actually go?</h3>
+      <p>To me — the person who built this website. It will most likely be spent on something worth approximately one dollar, continuing the ancient cycle of commerce. You are part of something now.</p>
+    </div>
+
+    <div class="qa">
+      <h3>Can I send more than a dollar?</h3>
+      <p>You can. The site is named after one dollar out of modesty, not law — PayPal will happily let you change the amount. No pressure, though. One dollar is, and always will be, plenty.</p>
+    </div>
+  </section>
+
+  <footer>That's it. That's the whole site.<br /><a href="/privacy.html">Privacy Policy</a></footer>
 
   <script>
   paypal.Buttons({
