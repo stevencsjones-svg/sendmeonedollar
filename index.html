@@ -208,6 +208,21 @@
   }
   .share-btn:hover { transform: translateY(-1px); border-color: #00c853; }
 
+  .hero-share {
+    margin-top: 2px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #111;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 9px;
+    padding: 9px 18px;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.1s ease;
+  }
+  .hero-share:hover { transform: translateY(-1px); border-color: #00c853; }
+
   .scroll-hint {
     margin-top: 12px;
     font-size: 0.85rem;
@@ -255,6 +270,7 @@
       <h1>Send Me One Dollar.</h1>
       <p class="blurb">I built a website. The website asks for a dollar. You're on the website.</p>
       <div id="paypal-button-container" onclick="gtag('event', 'click_pay_button', {'event_category': 'engagement', 'event_label': 'paypal_checkout', 'value': 1})"></div>
+      <button class="hero-share" type="button" onclick="shareSite(this)">📤 Share this with someone</button>
       <a class="scroll-hint" href="#faq">↓ wait, who are you?</a>
     </main>
   </section>
@@ -298,6 +314,7 @@
   <script>
   var SHARE_URL = 'https://sendmeonedollar.org';
   var SHARE_TEXT = 'I just sent a stranger $1 on sendmeonedollar.org. No reason. It was weirdly satisfying. Your turn:';
+  var SITE_SHARE_TEXT = 'A website that just asks you to send one dollar. No product, no catch — possibly the most honest site on the internet:';
 
   function escHtml(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
@@ -319,6 +336,24 @@
     }).catch(function () {
       btn.innerHTML = '⚠️ Press Ctrl+C';
     });
+  };
+
+  // Hero share button: native share sheet on mobile, copy-link fallback elsewhere.
+  window.shareSite = function (btn) {
+    if (navigator.share) {
+      navigator.share({ title: 'Send Me One Dollar', text: SITE_SHARE_TEXT, url: SHARE_URL })
+        .then(function () { trackShare('web_share'); })
+        .catch(function () { /* user cancelled the share sheet — do nothing */ });
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(SHARE_URL).then(function () {
+        var old = btn.innerHTML;
+        btn.innerHTML = '✅ Link copied — paste it to a friend';
+        trackShare('copy_link_hero');
+        setTimeout(function () { btn.innerHTML = old; }, 2400);
+      }).catch(function () {
+        btn.innerHTML = '⚠️ Press Ctrl+C to copy';
+      });
+    }
   };
 
   function thanksHtml(name) {
