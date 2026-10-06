@@ -356,7 +356,7 @@
       <button class="share-btn" type="submit">Make my link</button>
     </form>
     <div class="ref-result" id="ref-result" hidden></div>
-    <p class="fine">Every dollar sent through your link is tagged with your code in my PayPal records. Once five have come in, tell me your code and I'll send you a dollar. Honour system, PayPal is the referee, my decision is final.</p>
+    <p class="fine">Every dollar sent through your link is tagged with your code in my PayPal records. Once five have come in, email <a href="mailto:stevencsjones@gmail.com?subject=Dollar%20bounty%20claim">stevencsjones@gmail.com</a> with your code and your PayPal email, and I'll send you a dollar. Honour system, PayPal is the referee, my decision is final.</p>
   </section>
 
   <section class="share-section" id="share">
@@ -396,14 +396,24 @@
     MY_REF = code;
     SHARE_URL = BASE_URL + '/?ref=' + code;
     store('smod_myref', code);
-    var out = document.getElementById('ref-result');
-    out.hidden = false;
-    out.innerHTML = 'Your code is <code>' + escHtml(code) + '</code>. Write it down.<br /><br />' +
-      'Your link: <code>' + escHtml(SHARE_URL) + '</code><br /><br />' +
-      '<button class="share-btn" type="button" onclick="copyDollarLink(this)">🔗 Copy my link</button>';
+    showMyRef();
     renderSiteShareRow();
     if (window.gtag) gtag('event', 'make_ref_link');
   };
+
+  // Shows the visitor's code, link and a pre-filled claim email (also on return visits).
+  function showMyRef() {
+    if (!MY_REF) return;
+    var claim = 'mailto:stevencsjones@gmail.com' +
+      '?subject=' + encodeURIComponent('Dollar bounty claim: ' + MY_REF) +
+      '&body=' + encodeURIComponent('My code: ' + MY_REF + '\nMy PayPal email: \n\nFive dollars. Pay up.');
+    var out = document.getElementById('ref-result');
+    out.hidden = false;
+    out.innerHTML = 'Your code is <code>' + escHtml(MY_REF) + '</code>. Write it down.<br /><br />' +
+      'Your link: <code>' + escHtml(SHARE_URL) + '</code><br /><br />' +
+      '<button class="share-btn" type="button" onclick="copyDollarLink(this)">🔗 Copy my link</button> ' +
+      '<a class="share-btn" href="' + claim + '" onclick="trackShare(\'bounty_claim\')">💰 Claim my dollar</a>';
+  }
   var SHARE_TEXT = 'I just sent a stranger $1 on sendmeonedollar.org. No reason. It was weirdly satisfying. Your turn:';
   var SITE_SHARE_TEXT = 'A website that just asks you to send one dollar. No product, no catch — possibly the most honest site on the internet:';
 
@@ -467,6 +477,7 @@
       shareRowHtml(SITE_SHARE_TEXT, 'A website that just asks for one dollar', '_site');
   }
   renderSiteShareRow();
+  showMyRef();
 
   function thanksHtml(name) {
     return '' +
