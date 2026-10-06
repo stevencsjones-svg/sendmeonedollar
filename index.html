@@ -265,6 +265,32 @@
   }
   .share-section .sub { color: #555; font-size: 0.95rem; margin-bottom: 14px; }
 
+  .bounty {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 10px 20px 40px;
+    text-align: center;
+  }
+  .bounty h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+    margin-bottom: 6px;
+  }
+  .bounty p { color: #333; font-size: 0.98rem; margin-bottom: 14px; }
+  .bounty .fine { color: #888; font-size: 0.8rem; margin-top: 14px; margin-bottom: 0; }
+  .ref-form { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .ref-form input {
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 9px 12px;
+    border: 1px solid #ccc;
+    border-radius: 9px;
+    width: 220px;
+    max-width: 100%;
+  }
+  .ref-result { margin-top: 12px; font-size: 0.95rem; word-break: break-all; }
+  .ref-result code { background: #eee; padding: 3px 6px; border-radius: 6px; }
+
   footer {
     text-align: center;
     font-size: 0.9rem;
@@ -322,6 +348,17 @@
     </div>
   </section>
 
+  <section class="bounty" id="bounty">
+    <h2>The $1 bounty</h2>
+    <p>Get five people to send me a dollar and I'll send you one. That's a 20% commission, which is frankly generous.</p>
+    <form class="ref-form" onsubmit="makeRefLink(event)">
+      <input id="ref-name" type="text" maxlength="24" placeholder="Your name" autocomplete="given-name" required />
+      <button class="share-btn" type="submit">Make my link</button>
+    </form>
+    <div class="ref-result" id="ref-result" hidden></div>
+    <p class="fine">Every dollar sent through your link is tagged with your code in my PayPal records. Once five have come in, tell me your code and I'll send you a dollar. Honour system, PayPal is the referee, my decision is final.</p>
+  </section>
+
   <section class="share-section" id="share">
     <h2>Not sending a dollar? Fine. Share it.</h2>
     <p class="sub">Someone you know has a dollar.</p>
@@ -331,7 +368,42 @@
   <footer>That's it. That's the whole site.<br /><a href="/privacy.html">Privacy Policy</a></footer>
 
   <script>
-  var SHARE_URL = 'https://sendmeonedollar.org';
+  var BASE_URL = 'https://sendmeonedollar.org';
+  var SHARE_URL = BASE_URL;
+
+  // ---- Referral bounty ----
+  // Browser storage can be unavailable (private mode, blocked cookies), so every access is guarded.
+  function store(key, val) {
+    try { if (val === undefined) return localStorage.getItem(key); localStorage.setItem(key, val); } catch (e) { return null; }
+  }
+  function cleanRef(s) {
+    return String(s || '').toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 40);
+  }
+
+  // Who referred this visitor: the ref in the URL wins, otherwise the last one we saw.
+  var REFERRER = cleanRef(new URLSearchParams(location.search).get('ref'));
+  if (REFERRER) store('smod_ref', REFERRER); else REFERRER = cleanRef(store('smod_ref'));
+
+  // The visitor's own code, if they've made one; their share buttons then carry it.
+  var MY_REF = cleanRef(store('smod_myref'));
+  if (MY_REF) SHARE_URL = BASE_URL + '/?ref=' + MY_REF;
+
+  window.makeRefLink = function (e) {
+    e.preventDefault();
+    var name = cleanRef(document.getElementById('ref-name').value.replace(/\s+/g, '-'));
+    if (!name) return;
+    var code = name + '-' + Math.random().toString(36).slice(2, 6);
+    MY_REF = code;
+    SHARE_URL = BASE_URL + '/?ref=' + code;
+    store('smod_myref', code);
+    var out = document.getElementById('ref-result');
+    out.hidden = false;
+    out.innerHTML = 'Your code is <code>' + escHtml(code) + '</code>. Write it down.<br /><br />' +
+      'Your link: <code>' + escHtml(SHARE_URL) + '</code><br /><br />' +
+      '<button class="share-btn" type="button" onclick="copyDollarLink(this)">🔗 Copy my link</button>';
+    renderSiteShareRow();
+    if (window.gtag) gtag('event', 'make_ref_link');
+  };
   var SHARE_TEXT = 'I just sent a stranger $1 on sendmeonedollar.org. No reason. It was weirdly satisfying. Your turn:';
   var SITE_SHARE_TEXT = 'A website that just asks you to send one dollar. No product, no catch — possibly the most honest site on the internet:';
 
@@ -390,8 +462,11 @@
     return html + '<button class="share-btn" type="button" onclick="copyDollarLink(this)">🔗 Copy link</button>';
   }
 
-  document.getElementById('share-row-site').innerHTML =
-    shareRowHtml(SITE_SHARE_TEXT, 'A website that just asks for one dollar', '_site');
+  function renderSiteShareRow() {
+    document.getElementById('share-row-site').innerHTML =
+      shareRowHtml(SITE_SHARE_TEXT, 'A website that just asks for one dollar', '_site');
+  }
+  renderSiteShareRow();
 
   function thanksHtml(name) {
     return '' +
@@ -412,15 +487,20 @@
       label: 'pay'
     },
     createOrder: function(data, actions) {
-      return actions.order.create({
-        purchase_units: [{
-          amount: {
-            value: '1.00',
-            currency_code: 'USD'
-          },
-          description: 'One dollar. Just because.'
-        }]
-      });
+      var unit = {
+        amount: {
+          value: '1.00',
+          currency_code: 'USD'
+        },
+        description: 'One dollar. Just because.'
+      };
+      if (REFERRER) {
+        // custom_id is searchable in PayPal activity; the description also shows in the payment email.
+        unit.custom_id = 'ref:' + REFERRER;
+        unit.description = 'One dollar. Just because. (ref: ' + REFERRER + ')';
+      }
+      if (window.gtag) gtag('event', 'begin_checkout', { referrer_code: REFERRER || 'none' });
+      return actions.order.create({ purchase_units: [unit] });
     },
     onApprove: function(data, actions) {
       return actions.order.capture().then(function(details) {
