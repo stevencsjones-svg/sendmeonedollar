@@ -278,14 +278,14 @@
   }
   .bounty p { color: #333; font-size: 0.98rem; margin-bottom: 14px; }
   .bounty .fine { color: #888; font-size: 0.8rem; margin-top: 14px; margin-bottom: 0; }
-  .ref-form { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .ref-form { display: flex; flex-direction: column; align-items: center; gap: 8px; }
   .ref-form input {
     font: inherit;
     font-size: 0.95rem;
     padding: 9px 12px;
     border: 1px solid #ccc;
     border-radius: 9px;
-    width: 220px;
+    width: 280px;
     max-width: 100%;
   }
   .ref-result { margin-top: 12px; font-size: 0.95rem; word-break: break-all; }
@@ -353,10 +353,11 @@
     <p>Get five people to send me a dollar and I'll send you one. That's a 20% commission, which is frankly generous.</p>
     <form class="ref-form" onsubmit="makeRefLink(event)">
       <input id="ref-name" type="text" maxlength="24" placeholder="Your name" autocomplete="given-name" required />
-      <button class="share-btn" type="submit">Make my link</button>
+      <input id="ref-paypal" type="email" maxlength="254" placeholder="Your PayPal email" autocomplete="email" required />
+      <button class="share-btn" type="submit" id="ref-submit">Make my link</button>
     </form>
     <div class="ref-result" id="ref-result" hidden></div>
-    <p class="fine">Every dollar sent through your link is tagged with your code in my PayPal records. Once five have come in, email <a href="mailto:stevencsjones@gmail.com?subject=Dollar%20bounty%20claim">stevencsjones@gmail.com</a> with your code and your PayPal email, and I'll send you a dollar. Honour system, PayPal is the referee, my decision is final.</p>
+    <p class="fine">Your PayPal email is only for sending you your dollar. It never appears on this site. Every payment through your link is checked with PayPal and counted, and once you hit five I'll send you a dollar. You don't need to do anything. My decision is final.</p>
   </section>
 
   <section class="share-section" id="share">
@@ -390,29 +391,48 @@
 
   window.makeRefLink = function (e) {
     e.preventDefault();
-    var name = cleanRef(document.getElementById('ref-name').value.replace(/\s+/g, '-'));
-    if (!name) return;
-    var code = name + '-' + Math.random().toString(36).slice(2, 6);
-    MY_REF = code;
-    SHARE_URL = BASE_URL + '/?ref=' + code;
-    store('smod_myref', code);
-    showMyRef();
-    renderSiteShareRow();
-    if (window.gtag) gtag('event', 'make_ref_link');
+    var btn = document.getElementById('ref-submit');
+    var out = document.getElementById('ref-result');
+    btn.disabled = true;
+    fetch('/api/ref', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('ref-name').value,
+        paypal: document.getElementById('ref-paypal').value
+      })
+    }).then(function (r) {
+      return r.json().then(function (d) { if (!r.ok || !d.code) throw new Error(d.error || 'Something went wrong.'); return d; });
+    }).then(function (d) {
+      MY_REF = d.code;
+      SHARE_URL = BASE_URL + '/?ref=' + d.code;
+      store('smod_myref', d.code);
+      showMyRef();
+      renderSiteShareRow();
+      if (window.gtag) gtag('event', 'make_ref_link');
+    }).catch(function (err) {
+      out.hidden = false;
+      out.textContent = err.message === 'Failed to fetch' ? 'Something went wrong. Try again.' : err.message;
+    }).then(function () { btn.disabled = false; });
   };
 
-  // Shows the visitor's code, link and a pre-filled claim email (also on return visits).
+  // Shows the visitor's code, link and progress (also on return visits).
   function showMyRef() {
     if (!MY_REF) return;
-    var claim = 'mailto:stevencsjones@gmail.com' +
-      '?subject=' + encodeURIComponent('Dollar bounty claim: ' + MY_REF) +
-      '&body=' + encodeURIComponent('My code: ' + MY_REF + '\nMy PayPal email: \n\nFive dollars. Pay up.');
     var out = document.getElementById('ref-result');
     out.hidden = false;
-    out.innerHTML = 'Your code is <code>' + escHtml(MY_REF) + '</code>. Write it down.<br /><br />' +
-      'Your link: <code>' + escHtml(SHARE_URL) + '</code><br /><br />' +
-      '<button class="share-btn" type="button" onclick="copyDollarLink(this)">🔗 Copy my link</button> ' +
-      '<a class="share-btn" href="' + claim + '" onclick="trackShare(\'bounty_claim\')">💰 Claim my dollar</a>';
+    out.innerHTML = 'Your link: <code>' + escHtml(SHARE_URL) + '</code><br /><br />' +
+      '<button class="share-btn" type="button" onclick="copyDollarLink(this)">🔗 Copy my link</button>' +
+      '<p id="ref-progress" style="margin:12px 0 0"></p>';
+    fetch('/api/ref?code=' + encodeURIComponent(MY_REF)).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) return;
+        var toNext = 5 - (d.count % 5);
+        document.getElementById('ref-progress').textContent =
+          'Dollars brought in: ' + d.count + '. ' +
+          (d.paid ? 'Dollars paid to you: ' + d.paid + '. ' : '') +
+          (d.count >= 5 * (d.paid + 1) ? 'You\'ve earned one. It\'s on its way.' : toNext + ' more to go.');
+      }).catch(function () {});
   }
   var SHARE_TEXT = 'I just sent a stranger $1 on sendmeonedollar.org. No reason. It was weirdly satisfying. Your turn:';
   var SITE_SHARE_TEXT = 'A website that just asks you to send one dollar. No product, no catch — possibly the most honest site on the internet:';
@@ -515,6 +535,14 @@
     },
     onApprove: function(data, actions) {
       return actions.order.capture().then(function(details) {
+        // Tell the server so a referrer gets credit; it re-checks the order with PayPal itself.
+        if (REFERRER) {
+          fetch('/api/record', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ orderID: data.orderID })
+          }).catch(function () {});
+        }
         var name = (details && details.payer && details.payer.name && details.payer.name.given_name)
           ? details.payer.name.given_name : 'friend';
         document.getElementById('paypal-button-container').innerHTML = thanksHtml(name);

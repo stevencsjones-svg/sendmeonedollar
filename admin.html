@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Payouts | Send Me One Dollar</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💵</text></svg>" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fafafa;
+    color: #111;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    padding: 24px 16px 60px;
+  }
+  main { max-width: 860px; margin: 0 auto; }
+  h1 { font-family: Georgia, "Times New Roman", serif; font-size: 1.8rem; margin-bottom: 4px; }
+  .sub { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
+  form { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+  [hidden] { display: none !important; }
+  #key {
+    font: inherit; font-size: 0.95rem; padding: 9px 12px;
+    border: 1px solid #ccc; border-radius: 9px; width: 260px; max-width: 100%;
+  }
+  button {
+    font: inherit; font-size: 0.85rem; font-weight: 600; padding: 8px 14px;
+    border: 1px solid #ccc; border-radius: 9px; background: #fff; color: #111; cursor: pointer;
+  }
+  button:hover { border-color: #00c853; }
+  button.pay { background: #00a846; border-color: #00a846; color: #fff; }
+  .stats { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+  .stat { background: #fff; border: 1px solid #e3e3e3; border-radius: 10px; padding: 10px 14px; min-width: 130px; }
+  .stat b { display: block; font-size: 1.4rem; font-family: Georgia, serif; }
+  .stat span { font-size: 0.8rem; color: #666; }
+  .table-wrap { overflow-x: auto; background: #fff; border: 1px solid #e3e3e3; border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid #eee; white-space: nowrap; }
+  th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: #777; }
+  tr:last-child td { border-bottom: 0; }
+  tr.owed td { background: #effbf3; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  code { font-size: 0.85rem; }
+  .msg { color: #c62828; font-size: 0.9rem; margin-bottom: 12px; min-height: 1.2em; }
+  .empty { padding: 18px; color: #777; }
+  label.toggle { font-size: 0.85rem; color: #555; display: inline-flex; gap: 6px; align-items: center; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Payouts</h1>
+  <p class="sub">Everyone with a bounty link. Green rows have brought in five and are owed a dollar.</p>
+
+  <form id="login" onsubmit="load(event)">
+    <input id="key" type="password" placeholder="Admin password" autocomplete="current-password" required />
+    <button type="submit">Open</button>
+  </form>
+  <p class="msg" id="msg"></p>
+
+  <div id="out" hidden>
+    <div class="stats" id="stats"></div>
+    <label class="toggle"><input type="checkbox" id="owedOnly" onchange="render()" /> Only show people I owe</label>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Code</th><th>PayPal email</th><th class="num">Brought in</th><th class="num">Paid</th><th class="num">Owed</th><th></th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+  var KEY = '';
+  var ROWS = [];
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function msg(t) { document.getElementById('msg').textContent = t || ''; }
+
+  function api(method, body) {
+    return fetch('/api/admin', {
+      method: method,
+      headers: { 'x-admin-key': KEY, 'content-type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined
+    }).then(function (r) {
+      return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Error'); return d; });
+    });
+  }
+
+  function load(e) {
+    if (e) e.preventDefault();
+    KEY = document.getElementById('key').value;
+    try { sessionStorage.setItem('smod_admin', KEY); } catch (err) {}
+    msg('');
+    api('GET').then(function (d) {
+      ROWS = d.rows;
+      document.getElementById('login').hidden = true;
+      document.getElementById('out').hidden = false;
+      render();
+    }).catch(function (err) { msg(err.message); });
+  }
+
+  function render() {
+    var onlyOwed = document.getElementById('owedOnly').checked;
+    var total = ROWS.reduce(function (a, r) { return a + r.count; }, 0);
+    var owed = ROWS.reduce(function (a, r) { return a + r.owed; }, 0);
+    var paid = ROWS.reduce(function (a, r) { return a + r.paid; }, 0);
+    document.getElementById('stats').innerHTML =
+      stat(ROWS.length, 'bounty links') + stat('$' + total, 'brought in by referrals') +
+      stat('$' + owed, 'owed now') + stat('$' + paid, 'paid out');
+
+    var list = ROWS.filter(function (r) { return !onlyOwed || r.owed > 0; });
+    document.getElementById('rows').innerHTML = list.length ? list.map(function (r) {
+      return '<tr class="' + (r.owed ? 'owed' : '') + '">' +
+        '<td>' + esc(r.name) + '</td>' +
+        '<td><code>' + esc(r.code) + '</code></td>' +
+        '<td>' + esc(r.paypal) + ' <button type="button" data-v="' + esc(r.paypal) + '" onclick="copy(this)">Copy</button></td>' +
+        '<td class="num">' + r.count + '</td>' +
+        '<td class="num">' + r.paid + '</td>' +
+        '<td class="num">' + (r.owed ? '<b>$' + r.owed + '</b>' : '–') + '</td>' +
+        '<td>' + (r.owed ? '<button class="pay" type="button" data-v="' + esc(r.code) + '" onclick="markPaid(this)">Mark $1 paid</button>' : '') + '</td>' +
+      '</tr>';
+    }).join('') : '<tr><td colspan="7" class="empty">Nobody yet.</td></tr>';
+  }
+
+  function stat(v, label) { return '<div class="stat"><b>' + esc(v) + '</b><span>' + label + '</span></div>'; }
+
+  function copy(btn) {
+    navigator.clipboard.writeText(btn.dataset.v).then(function () {
+      btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1500);
+    });
+  }
+
+  function markPaid(btn) {
+    var code = btn.dataset.v;
+    if (!confirm('Record that you have sent $1 to ' + code + '?')) return;
+    btn.disabled = true;
+    api('POST', { code: code }).then(function () { return api('GET'); })
+      .then(function (d) { ROWS = d.rows; render(); })
+      .catch(function (err) { msg(err.message); btn.disabled = false; });
+  }
+
+  try {
+    var saved = sessionStorage.getItem('smod_admin');
+    if (saved) { document.getElementById('key').value = saved; load(); }
+  } catch (err) {}
+</script>
+</body>
+</html>
