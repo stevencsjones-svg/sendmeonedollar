@@ -252,6 +252,19 @@
   .qa p { color: #333; font-size: 0.98rem; }
   .qa a { color: #00a846; font-weight: 600; }
 
+  .share-section {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 10px 20px 40px;
+    text-align: center;
+  }
+  .share-section h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+    margin-bottom: 6px;
+  }
+  .share-section .sub { color: #555; font-size: 0.95rem; margin-bottom: 14px; }
+
   footer {
     text-align: center;
     font-size: 0.9rem;
@@ -309,6 +322,12 @@
     </div>
   </section>
 
+  <section class="share-section" id="share">
+    <h2>Not sending a dollar? Fine. Share it.</h2>
+    <p class="sub">Someone you know has a dollar.</p>
+    <div class="share-row" id="share-row-site"></div>
+  </section>
+
   <footer>That's it. That's the whole site.<br /><a href="/privacy.html">Privacy Policy</a></footer>
 
   <script>
@@ -338,42 +357,49 @@
     });
   };
 
-  // Hero share button: native share sheet on mobile, copy-link fallback elsewhere.
+  // Hero share button: native share sheet on mobile; elsewhere, jump to the share buttons.
   window.shareSite = function (btn) {
     if (navigator.share) {
       navigator.share({ title: 'Send Me One Dollar', text: SITE_SHARE_TEXT, url: SHARE_URL })
         .then(function () { trackShare('web_share'); })
         .catch(function () { /* user cancelled the share sheet — do nothing */ });
-    } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(SHARE_URL).then(function () {
-        var old = btn.innerHTML;
-        btn.innerHTML = '✅ Link copied — paste it to a friend';
-        trackShare('copy_link_hero');
-        setTimeout(function () { btn.innerHTML = old; }, 2400);
-      }).catch(function () {
-        btn.innerHTML = '⚠️ Press Ctrl+C to copy';
-      });
+    } else {
+      document.getElementById('share').scrollIntoView({ behavior: 'smooth' });
+      trackShare('hero_to_share_row');
     }
   };
 
-  function thanksHtml(name) {
-    var msg = encodeURIComponent(SHARE_TEXT + ' ' + SHARE_URL);
+  // Builds the row of share buttons. `text` is the pre-filled message where the platform allows one
+  // (LinkedIn and Facebook only take the URL and pull the title/image from the Open Graph tags).
+  function shareRowHtml(text, title, suffix) {
     var url = encodeURIComponent(SHARE_URL);
-    var title = encodeURIComponent('I sent a stranger one dollar for no reason');
-    var wa = 'https://wa.me/?text=' + msg;
-    var x = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(SHARE_TEXT) + '&url=' + url;
-    var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + url;
-    var rd = 'https://www.reddit.com/submit?url=' + url + '&title=' + title;
+    var msg = encodeURIComponent(text + ' ' + SHARE_URL);
+    var links = [
+      ['linkedin', '💼 LinkedIn', 'https://www.linkedin.com/sharing/share-offsite/?url=' + url],
+      ['facebook', '📘 Facebook', 'https://www.facebook.com/sharer/sharer.php?u=' + url],
+      ['whatsapp', '💬 WhatsApp', 'https://wa.me/?text=' + msg],
+      ['x', '✖ X', 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + url],
+      ['reddit', '👽 Reddit', 'https://www.reddit.com/submit?url=' + url + '&title=' + encodeURIComponent(title)],
+      ['email', '✉️ Email', 'mailto:?subject=' + encodeURIComponent(title) + '&body=' + msg]
+    ];
+    var html = links.map(function (l) {
+      var target = l[0] === 'email' ? '' : ' target="_blank" rel="noopener"';
+      return '<a class="share-btn" href="' + l[2] + '"' + target +
+        ' onclick="trackShare(\'' + l[0] + suffix + '\')">' + l[1] + '</a>';
+    }).join('');
+    return html + '<button class="share-btn" type="button" onclick="copyDollarLink(this)">🔗 Copy link</button>';
+  }
+
+  document.getElementById('share-row-site').innerHTML =
+    shareRowHtml(SITE_SHARE_TEXT, 'A website that just asks for one dollar', '_site');
+
+  function thanksHtml(name) {
     return '' +
       '<div class="thanks">' +
         '<h3>✅ Thank you, ' + escHtml(name) + '.<br />You\'re officially a good person.</h3>' +
         '<p class="sub">Now make someone else do it 👇</p>' +
         '<div class="share-row">' +
-          '<a class="share-btn" href="' + wa + '" target="_blank" rel="noopener" onclick="trackShare(\'whatsapp\')">💬 WhatsApp</a>' +
-          '<button class="share-btn" type="button" onclick="copyDollarLink(this)">🔗 Copy link</button>' +
-          '<a class="share-btn" href="' + fb + '" target="_blank" rel="noopener" onclick="trackShare(\'facebook\')">📘 Facebook</a>' +
-          '<a class="share-btn" href="' + rd + '" target="_blank" rel="noopener" onclick="trackShare(\'reddit\')">👽 Reddit</a>' +
-          '<a class="share-btn" href="' + x + '" target="_blank" rel="noopener" onclick="trackShare(\'x\')">✖ X</a>' +
+          shareRowHtml(SHARE_TEXT, 'I sent a stranger one dollar for no reason', '') +
         '</div>' +
       '</div>';
   }
